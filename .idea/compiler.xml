@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="lab5rest" />
+        <module name="web_service_lab6" />
         <module name="lab4rest" />
       </profile>
     </annotationProcessing>

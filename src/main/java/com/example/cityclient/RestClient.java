@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import org.apache.commons.codec.binary.Base64;
+
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -13,12 +15,16 @@ public class RestClient {
     private static final String BASE_URL = "http://localhost:8080/cities";
     private final Client client;
     private final ObjectMapper objectMapper;
-
+    private static final String USERNAME = "admin"; // Имя пользователя
+    private static final String PASSWORD = "password"; // Пароль
     public RestClient() {
         this.client = Client.create();
         this.objectMapper = new ObjectMapper();
     }
-
+    private String getAuthHeader() {
+        String auth = USERNAME + ":" + PASSWORD;
+        return "Basic " + Base64.encodeBase64String(auth.getBytes());
+    }
     public List<City> searchCities(String name, String country, String theme, Integer population, Integer foundedYear) {
         WebResource webResource = client.resource(BASE_URL + "/search");
 
@@ -55,6 +61,7 @@ public class RestClient {
         try {
             ClientResponse response = webResource
                     .type(MediaType.APPLICATION_JSON)
+                    .header("Authorization", getAuthHeader())
                     .post(ClientResponse.class, objectMapper.writeValueAsString(city));
             checkResponse(response);
             JsonNode jsonNode = objectMapper.readTree(response.getEntity(String.class));
@@ -70,6 +77,7 @@ public class RestClient {
         try {
             ClientResponse response = webResource
                     .type(MediaType.APPLICATION_JSON)
+                    .header("Authorization", getAuthHeader())
                     .put(ClientResponse.class, objectMapper.writeValueAsString(city));
             int status = response.getStatus();
             checkResponse(response);
@@ -83,7 +91,9 @@ public class RestClient {
         WebResource webResource = client.resource(BASE_URL + "/delete/" + id);
 
         try {
-            ClientResponse response = webResource.delete(ClientResponse.class);
+            ClientResponse response = webResource
+                    .header("Authorization", getAuthHeader())
+                    .delete(ClientResponse.class);
             int status = response.getStatus();
             checkResponse(response);
             return "Удаление успешно. Статус: " + status + ". Ответ: " + response.getEntity(String.class);

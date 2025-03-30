@@ -7,6 +7,7 @@ import com.example.cityservice.InvalidCityDataException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class CityService {
             return cityRepository.findAll();
         }
     }
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public City createCity(City city) {
         if (city.getName() == null || city.getName().trim().isEmpty()) {
             throw new InvalidCityDataException("Название города не может быть пустым.");
@@ -46,7 +47,7 @@ public class CityService {
         }
         return cityRepository.save(city);
     }
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public City updateCity(int id, City cityDetails) {
         Optional<City> cityOptional = cityRepository.findById(id);
         if (!cityOptional.isPresent()) {
@@ -61,7 +62,7 @@ public class CityService {
 
         return cityRepository.save(city);
     }
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteCity(int id) {
         if (!cityRepository.existsById(id)) {
             throw new CityNotFoundException("Город с ID " + id + " не найден.");
